@@ -252,3 +252,80 @@ Bit Rate = Baud Rate × Number of Bits per Symbol
 ![Grap](grap.png)
 
 ---
+
+## 🔹 UART Reception Flow in PIC18F Microcontroller
+
+### 🔸 Step-by-Step Flow
+
+1. **RX Pin (Receive Pin)**
+   - Receives serial data (start bit → data bits → stop bit).
+
+2. **RSR (Receive Shift Register)**
+   - Deserializes incoming bits into a full 8-bit data frame.
+   - Not accessible by the user.
+
+3. **RCREG (Receive Buffer Register)**
+   - Once RSR is full, byte is moved to RCREG.
+   - Your code can read it like this:
+     ```c
+     char data = RCREG;
+     ```
+
+4. **Read the Data**
+   - You must read RCREG before the next byte arrives to avoid **overrun**.
+
+---
+
+### 🔸 Flow Summary
+
+```
+Incoming Serial Bits 
+       ↓
+     RX Pin 
+       ↓
+Shifted into RSR 
+       ↓
+RSR → RCREG (buffer)
+       ↓
+Your Code Reads RCREG 
+       ↓
+     [Your Data]
+```
+
+---
+
+## 🔹 UART Transmission Flow in PIC18F Microcontroller
+
+### 🔸 Step-by-Step Flow
+
+1. **Write Data to TXREG**
+   ```c
+   TXREG = 'A';
+   ```
+   - TXREG holds the byte temporarily.
+
+2. **TSR (Transmit Shift Register)**
+   - Automatically loaded from TXREG when TSR is empty.
+   - Serializes the data (start bit + data bits + stop bit).
+   - Not directly accessible by the programmer.
+
+3. **TX Pin (Transmit Pin)**
+   - Sends bits one at a time at the configured baud rate.
+
+---
+
+### 🔸 Flow Summary
+
+```
+[Your Data] 
+   ↓
+Write to TXREG
+   ↓
+If TSR empty → Data copied to TSR
+   ↓
+TSR serializes data frame
+   ↓
+Bits shifted out on TX pin
+```
+
+---
