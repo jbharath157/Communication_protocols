@@ -185,3 +185,77 @@ SCL --->|     |
 | Simplicity           | Moderate (some protocol handling)   |
 
 ---
+
+## ⚔️ I²C Arbitration and Clock Synchronization
+
+---
+
+## 🧠 1. I²C Arbitration (Data Arbitration)
+
+### 📌 What is it?
+
+Arbitration is a method that ensures only **one master** communicates at a time on a shared I²C bus.
+
+---
+
+### 🔄 How it Works:
+
+- Each master **monitors SDA** while transmitting
+- If it sends a **HIGH (1)** but reads **LOW (0)**, it **loses arbitration**
+- It **stops communication** immediately
+
+### ✅ Result:
+
+- The **winning master** continues transmission
+- The **losing master** silently waits
+
+---
+
+### 📘 Example:
+
+Two masters send:
+- Master A: `01100000`
+- Master B: `01101000`
+
+At bit 5:
+- A sends 0, B sends 1 → SDA = 0 → B loses arbitration
+
+---
+
+## 🧠 2. Clock Synchronization
+
+### 📌 Why is it needed?
+
+In multi-master systems, multiple clocks may exist. I²C ensures synchronization using the **wired-AND nature** of the SCL line.
+
+---
+
+### 🔧 How it Works:
+
+- All devices can **pull SCL LOW**
+- None can **drive it HIGH** (open-drain)
+- The final clock is the **logical AND** of all masters
+
+> So, if any device pulls SCL LOW, the clock is LOW → everyone waits
+
+---
+
+### 🕑 Clock Stretching
+
+- **Slaves can hold SCL LOW** to delay the master
+- Master waits until SCL goes HIGH (released by slave)
+
+---
+
+## ✅ Summary
+
+| Feature              | Description                                       |
+|----------------------|---------------------------------------------------|
+| **Arbitration**       | Master checks SDA for mismatch while transmitting |
+| **Who wins?**         | The master that matches SDA keeps going          |
+| **Clock Sync**        | Slowest device controls SCL timing               |
+| **Clock Stretching**  | Slaves can delay communication by holding SCL LOW|
+
+---
+
+> These two features make I²C a powerful and robust **multi-master, multi-slave** communication protocol.
