@@ -259,3 +259,79 @@ In multi-master systems, multiple clocks may exist. I²C ensures synchronization
 ---
 
 > These two features make I²C a powerful and robust **multi-master, multi-slave** communication protocol.
+
+
+## 🕐 Clock Stretching in I²C
+
+---
+
+## ⏰ What is Clock Stretching?
+
+**Clock stretching** is when a **slave device holds the SCL line LOW**, preventing the master from sending the next clock pulse.
+
+> It allows the slave to delay the communication until it’s ready.
+
+---
+
+## 🛠️ How It Works
+
+1. Master pulls SCL LOW → begins a clock pulse
+2. Master releases SCL HIGH → ends the pulse
+3. **Slave holds SCL LOW**
+4. Master must **wait** until slave releases SCL
+5. Only then can the master continue to the next bit
+
+---
+
+## 🧪 Why Slaves Stretch the Clock?
+
+| Scenario                        | Reason                        |
+|----------------------------------|-------------------------------|
+| Sensor needs conversion time     | ADC or sensor still measuring |
+| EEPROM read                      | Internal memory fetch         |
+| Buffer not ready                 | Data prep in progress         |
+| I/O delay                        | Limited processing power      |
+
+---
+
+## 👀 Does the Master Handle This?
+
+- Master must **check if SCL is truly HIGH** before continuing
+- Most hardware I²C modules handle this **automatically**
+
+---
+
+## 📊 Timing Visualization
+
+```
+SCL:  ──┐__________┐──────   ← Slave holds SCL LOW (stretching)
+         ↑        ↑
+       Master    Slave
+       releases  releases
+
+SDA:  ────────────────     ← Data paused
+```
+
+---
+
+## ✅ Good to Know
+
+- Required for some devices
+- Ignoring it can cause **data corruption**
+- Fully supported by most platforms (STM32, Arduino, Raspberry Pi)
+
+---
+
+## 📎 Summary
+
+| Feature            | Description                                |
+|--------------------|--------------------------------------------|
+| Who                | Slave holds SCL LOW                        |
+| Why                | Needs time to process                      |
+| Master behavior    | Wait until SCL is HIGH                     |
+| Risk if ignored    | Data loss, bus errors                      |
+| Automatically handled | ✅ Yes, by most I²C drivers             |
+
+---
+
+> Clock stretching ensures I²C communication is **reliable**, even with slower or memory-based slave devices.
